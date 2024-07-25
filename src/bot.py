@@ -17,19 +17,21 @@ def send_welcome(message):
 
 
 def clean_url(url): 
-    d = urlparse(url)
-    if d.query == '':
+    parsed_url = urlparse(url)
+    if parsed_url.query == '':
         return url
-    qu = ""
-    for q in d.query.split('&'):
-        key, val = q.split('=')
+    
+    cleaned = ""
+    for query in parsed_url.query.split('&'):
+        key, val = query.split('=')
         if key in trackers:
             continue
-        qu += key + '=' + val + '&'
-    qu = qu[:-1]
-    d = d._replace(query=qu)
-    return d.geturl()
-
+    
+        cleaned += key + '=' + val + '&'
+    
+    cleaned = cleaned[:-1]
+    parsed_url = parsed_url._replace(query=cleaned)
+    return parsed_url.geturl()
 
 @bot.message_handler(func=lambda msg: True)
 def handle_message(message):
@@ -37,14 +39,17 @@ def handle_message(message):
     detected = False
     if not message.entities:
         return
-    for e in message.entities:
-        if e.type != 'url':
+    
+    for entity in message.entities:
+        if entity.type != 'url':
             continue
-        u = message.text[e.offset:e.offset + e.length]
-        cleaned = clean_url(u)
-        if cleaned != u:
+        
+        url = message.text[entity.offset:entity.offset + entity.length]
+        cleaned = clean_url(url)
+        if cleaned != url:
             detected = True 
-            reply += clean_url(u) + '\n'
+            reply += cleaned + '\n'
+    
     if detected:
         bot.reply_to(message, reply)
 
