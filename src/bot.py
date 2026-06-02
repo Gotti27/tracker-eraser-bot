@@ -63,7 +63,6 @@ def clean_url(url):
     return parsed_url.geturl()
 
 
-@bot.message_handler(func=lambda msg: True)
 def handle_message(message: Message):
     reply = "Cleaned urls:\n"
     detected = False
@@ -92,6 +91,12 @@ def handle_message(message: Message):
     elif detected:
         bot.reply_to(message, reply)
 
+@bot.message_handler(func=lambda msg: True)
+def handle_message_entrypoint(message: Message):
+    try:
+        handle_message(message)
+    except:
+        bot.reply_to(message, "An error occurred, try again")
 
 if __name__ == '__main__':
     print("Bot started")
